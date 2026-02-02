@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DeFi Router – Transaction Portal</title>
+  <link rel="icon" href="Defi logo 2.png">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #1a103d, #32185b, #7326c5);
+      background-size: 300% 300%;
+      animation: gradientShift 10s ease infinite;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    nav {
+      width: 100%; display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 50px; background: rgba(255,255,255,0.05); backdrop-filter: blur(12px);
+      position: fixed; top: 0; z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 22px; }
+    .logo img { width: 40px; height: 40px; border-radius: 50%; filter: drop-shadow(0 0 10px #9c27b0); }
+    .nav-links { display: flex; gap: 25px; align-items: center; }
+    .nav-links a { color: #fff; text-decoration: none; font-size: 16px; transition: color 0.3s ease; }
+    .nav-links a:hover { color: #a855f7; }
+    .connect-btn {
+      padding: 10px 18px; background: linear-gradient(45deg, #6a00ff, #b517ff);
+      border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: bold;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+    .connect-btn:hover { transform: translateY(-2px); box-shadow: 0 0 15px #b517ff, 0 0 25px #6a00ff; }
+
+    .main-layout { margin-top: 120px; display:flex; justify-content:center; align-items:flex-start; flex-wrap:wrap; gap:40px; padding:20px; }
+    .container {
+      background: rgba(255,255,255,0.07); border-radius:20px; padding:35px 40px; width:440px;
+      text-align:center; box-shadow:0 8px 25px rgba(0,0,0,0.4); backdrop-filter: blur(14px); transition: all 0.3s ease;
+    }
+    .container:hover { box-shadow: 0 0 25px #a855f7; transform: translateY(-5px); }
+    h1, h2 { color: #c084fc; margin-bottom: 20px; text-shadow: 0 0 12px rgba(155,0,255,0.6); }
+
+    input, select {
+      width: 90%; padding: 12px; margin: 8px 0; border: none; border-radius: 8px; font-size:15px;
+      outline: none; text-align:center; background: rgba(255,255,255,0.1); color:#fff;
+    }
+    button {
+      margin-top: 12px; padding: 12px 20px; border: none; border-radius: 10px; cursor: pointer;
+      font-size: 15px; font-weight: bold; background: linear-gradient(45deg, #7b2ff7, #f107a3); color:#fff;
+      transition: all 0.3s ease;
+    }
+    button:hover { transform: scale(1.06); box-shadow: 0 0 20px #7b2ff7; }
+    #wallet { margin: 12px 0; font-size:14px; color:#aee7ff; }
+    #status {
+      margin-top:20px; font-size:14px; padding:10px; border-radius:8px; background: rgba(255,255,255,0.1); color:#ffdd88;
+      min-height: 22px;
+    }
+    .divider { margin:25px 0; border-top:1px solid rgba(255,255,255,0.2); }
+    .swap-box { background: rgba(255,255,255,0.07); border-radius:16px; padding:25px; margin-top:20px; box-shadow:0 0 15px rgba(0,0,0,0.3); }
+    footer { text-align:center; color:#aaa; margin-top:80px; padding:20px; border-top:1px solid rgba(255,255,255,0.1); }
+  </style>
+</head>
+
+
+<body>
+
+  <nav>
+    <div class="logo">
+      <img src="Defi_logo_2-removebg-preview.png" alt="Logo">
+      <span>DeFi Router</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="demo.html">Transaction</a>
+      <a href="#">Swap</a>
+      <a href="stake.html">Stake</a>
+      <a href="crosschain.html">Cross-Chain</a>
+      <a href="help.html">Help</a>
+      <a href="about.html">About</a>
+    </div>
+    <button class="connect-btn" onclick="connectWallet()">🔗 Connect Wallet</button>
+  </nav>
+
+  <div class="main-layout">
+    <div class="container">
+      <h1>🚀 Send POL Tokens</h1>
+
+      <button onclick="connectWallet()">Connect Wallet</button>
+      <p id="wallet">Not connected</p>
+
+      <input type="text" id="receiver" placeholder="Receiver Address (0x...)" />
+      <input type="text" id="amount" placeholder="Amount in POL (e.g. 0.01)" />
+      <button onclick="sendToken()">💸 Send Token</button>
+      <p id="status"></p>
+
+      <div class="divider"></div>
+
+      <h2>💰 Buy / Sell Cryptocurrency</h2>
+      <select id="coinType">
+        <option value="bitcoin">Bitcoin (BTC)</option>
+        <option value="ethereum">Ethereum (ETH)</option>
+        <option value="polygon">Polygon (MATIC)</option>
+      </select>
+
+      <p id="livePrice">Fetching price...</p>
+      <input type="number" id="inrInput" placeholder="Enter amount in INR" />
+      <button onclick="buyCrypto()">🟢 Buy</button>
+      <button onclick="sellCrypto()">🔴 Sell</button>
+      <div id="buySellResult" style="margin-top:15px; text-align:left; font-size:14px;"></div>
+
+      <div class="divider"></div>
+
+      <div class="swap-box">
+        <h2>💱 Token Swap (Amoy Testnet)</h2>
+        <p style="font-size:14px; color:#aee7ff;">Swap MATIC ↔ Test Tokens using QuickSwap router</p>
+
+        <input type="text" id="swapAmount" placeholder="Enter amount (MATIC)" />
+        <br>
+        <label>From Token:</label>
+        <select id="fromToken"><option value="MATIC">MATIC</option></select>
+        <label>To Token:</label>
+        <select id="toToken"><option value="USDT">Test USDT</option></select>
+
+        <br>
+        <button onclick="getQuote()">💰 Get Quote</button>
+        <button onclick="swapTokens()">🚀 Swap Now</button>
+        <p id="quoteResult"></p>
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2025 DeFi Router. All Rights Reserved.</footer>
+<script>
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please login first");
+    window.location.href = "login.html";
+  }
+</script>
+  <script>
+  let provider, signer, contract;
+  const contractAddress = "0x1113C71284754Efa4Ff181A0eB445db66A6b71Fd";
+  const contractABI = ["function sendToken(address payable _to) public payable"];
+
+  async function connectWallet() {
+    if (window.ethereum) {
+      try {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        contract = new ethers.Contract(contractAddress, contractABI, signer);
+        const addr = await signer.getAddress();
+        document.getElementById("wallet").innerText = "✅ Connected: " + addr;
+      } catch (err) {
+        document.getElementById("wallet").innerText = "❌ Wallet connection failed";
+        console.error(err);
+      }
+    } else {
+      alert("MetaMask not found!");
+    }
+  }
+
+  // --------------- LOCAL DEMO RISK LISTS ---------------
+  // Exact lists you gave — lowercase for safe comparison
+  const HIGH_RISK_LOCAL = [
+    "0x1a92f7381b9f03921564a437210bb9396471050c",
+    "0x8d7e0f90b584a453c7ceffb79e2c3b79efb44c16",
+    "0x1bfeea3b33b6e5e44bba10f038e3f6d49e2f21f2"
+  ].map(a => a.toLowerCase());
+
+  const MEDIUM_RISK_LOCAL = [
+    "0x6b175474e89094c44da98b954eedeac495271d0f",
+    "0x742d35cc6634c0532925a3b844bc454e4438f44e",
+    "0x3f5ce5fbfe3e9af3971d0ef2d5a91b7fbe3ccdbd"
+  ].map(a => a.toLowerCase());
+
+  // Your live backend (used only if address not in the local lists)
+  const BACKEND_BASE = "https://router-ai-backend-7.onrender.com";
+
+  async function checkRiskLevel(receiver) {
+    // receiver expected checksummed (ethers.getAddress) — but we'll compare lowercase
+    const receiverLower = receiver.toLowerCase();
+
+    // 1) Local override: immediate result for demo addresses
+    if (HIGH_RISK_LOCAL.includes(receiverLower)) {
+      return { risk: "high", message: "🚨 High Risk (local demo rule)" };
+    }
+    if (MEDIUM_RISK_LOCAL.includes(receiverLower)) {
+      return { risk: "medium", message: "⚠ Medium Risk (local demo rule)" };
+    }
+
+    // 2) Fallback to backend for any other address
+    try {
+      const response = await fetch(`${BACKEND_BASE}/check_wallet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress: receiver })
+      });
+      if (!response.ok) {
+        console.error("Backend returned non-OK:", response.status);
+        return { risk: "low", message: "⚠ Backend error — defaulting to low risk" };
+      }
+      const data = await response.json();
+      // Ensure we return risk and message keys
+      return { risk: data.risk || "low", message: data.message || "" };
+    } catch (err) {
+      console.error("Risk check failed:", err);
+      return { risk: "low", message: "⚠ AI system offline – defaulting to low risk" };
+    }
+  }
+
+  async function sendToken() {
+    const rawReceiver = document.getElementById("receiver").value.trim();
+    const amount = document.getElementById("amount").value.trim();
+    if (!rawReceiver || !amount) {
+      document.getElementById("status").innerText = "⚠ Enter receiver and amount";
+      return;
+    }
+
+    // Normalize & validate address to avoid checksum errors
+    let receiver;
+    try {
+      // convert to lowercase then get checksum address; this avoids bad-checksum mixed-case errors
+      receiver = ethers.utils.getAddress(rawReceiver.toLowerCase());
+    } catch (err) {
+      console.error("Address validation failed:", err);
+      document.getElementById("status").innerText = "❌ Invalid receiver address.";
+      return;
+    }
+
+    // Ensure wallet connected / contract available
+    if (!contract || !signer) {
+      document.getElementById("status").innerText = "⚠ Connect your wallet first.";
+      return;
+    }
+
+    // 1) Check risk (local-first)
+    document.getElementById("status").innerText = "🔍 Checking wallet risk level...";
+    const riskData = await checkRiskLevel(receiver);
+
+    // 2) Enforce demo behavior
+    if (riskData.risk === "high") {
+      // High → block
+      document.getElementById("status").innerHTML = "🚨 <b>High Risk:</b> Transaction blocked!";
+      alert("⚠️ High Risk Wallet Detected! Transaction Blocked.");
+      return;
+    } else if (riskData.risk === "medium") {
+      // Medium → ask permission
+      const proceed = confirm("⚠️ Medium Risk detected. Do you want to proceed with the transaction?");
+      if (!proceed) {
+        document.getElementById("status").innerHTML = "❌ Transaction cancelled by user (medium risk).";
+        return;
+      } else {
+        document.getElementById("status").innerHTML = "⚠ Proceeding after user confirmation (medium risk).";
+      }
+    } else {
+      // Low → proceed
+      document.getElementById("status").innerHTML = "✅ Low Risk: Safe to proceed.";
+    }
+
+    // 3) Send transaction
+    try {
+      const tx = await contract.sendToken(receiver, { value: ethers.utils.parseEther(amount) });
+      document.getElementById("status").innerText = "⏳ Transaction sent... waiting for confirmation";
+      await tx.wait();
+      document.getElementById("status").innerText = "✅ Success! Tx Hash: " + tx.hash;
+    } catch (err) {
+      console.error(err);
+      document.getElementById("status").innerText = "❌ Error: " + (err?.data?.message || err.message);
+    }
+  }
+
+  // --- Swap / Quote Logic (unchanged) ---
+  function getQuote() {
+    const amountIn = document.getElementById("swapAmount").value.trim();
+    const quoteBox = document.getElementById("quoteResult");
+    if (!amountIn || isNaN(amountIn) || amountIn <= 0) {
+      quoteBox.innerText = "⚠️ Please enter a valid amount.";
+      return;
+    }
+    const fakeRate = 1.05;
+    const estimatedOut = (amountIn * fakeRate).toFixed(2);
+    quoteBox.innerText = `💱 Estimated Output: ${estimatedOut} USDT (simulated rate)`;
+  }
+
+  const routerAddress = "0x8954AfA98594b838bda56FE4C12a09D7739D179b";
+  const USDT = "0xe11A86849d99F524cAC3E7A0Ec1241828e332C62";
+  const WETH = "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa";
+  const routerABI = [
+    "function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)"
+  ];
+
+  async function swapTokens() {
+    try {
+      const amountIn = document.getElementById("swapAmount").value;
+      if (!amountIn) return alert("Enter amount first!");
+      const localProvider = new ethers.providers.Web3Provider(window.ethereum);
+      const localSigner = localProvider.getSigner();
+      const router = new ethers.Contract(routerAddress, routerABI, localSigner);
+      const path = [WETH, USDT];
+      const to = await localSigner.getAddress();
+      const deadline = Math.floor(Date.now() / 1000) + 600;
+      const tx = await router.swapExactETHForTokens(0, path, to, deadline, { value: ethers.utils.parseEther(amountIn) });
+      document.getElementById("quoteResult").innerText = "⏳ Swapping... please wait";
+      await tx.wait();
+      document.getElementById("quoteResult").innerText = "✅ Swap successful! Hash: " + tx.hash;
+    } catch (err) {
+      alert("Swap failed: " + (err?.data?.message || err.message));
+    }
+  }
+
+  async function fetchPrice(coin) {
+    try {
+      const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coin}&vs_currencies=inr`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return data[coin].inr;
+    } catch {
+      document.getElementById("buySellResult").innerText = "⚠ Error fetching price.";
+    }
+  }
+
+  async function buyCrypto() {
+    const coin = document.getElementById("coinType").value;
+    const inrAmount = parseFloat(document.getElementById("inrInput").value);
+    if (!inrAmount || inrAmount <= 0) {
+      document.getElementById("buySellResult").innerText = "⚠ Please enter a valid INR amount.";
+      return;
+    }
+    const price = await fetchPrice(coin);
+    const tax = inrAmount * 0.3;
+    const total = inrAmount + tax;
+    const cryptoAmount = (inrAmount / price).toFixed(6);
+    document.getElementById("livePrice").innerText = `1 ${coin.toUpperCase()} = ₹${price}`;
+    document.getElementById("buySellResult").innerHTML = `
+      <p>🟢 <b>Buy Summary</b></p>
+      <p>💰 Buying: <b>${cryptoAmount} ${coin.toUpperCase()}</b></p>
+      <p>💵 Price: ₹${price}</p>
+      <p>💸 30% Tax: ₹${tax.toFixed(2)}</p>
+      <p>🧾 Total: <b>₹${total.toFixed(2)}</b></p>
+      `;
+  }
+
+  async function sellCrypto() {
+    const coin = document.getElementById("coinType").value;
+    const inrAmount = parseFloat(document.getElementById("inrInput").value);
+    if (!inrAmount || inrAmount <= 0) {
+      document.getElementById("buySellResult").innerText = "⚠ Please enter a valid INR amount.";
+      return;
+    }
+    const price = await fetchPrice(coin);
+    const cryptoAmount = (inrAmount / price).toFixed(6);
+    const tax = inrAmount * 0.3;
+    const receive = inrAmount - tax;
+    document.getElementById("livePrice").innerText = `1 ${coin.toUpperCase()} = ₹${price}`;
+    document.getElementById("buySellResult").innerHTML = `
+      <p>🔴 <b>Sell Summary</b></p>
+      <p>💰 Selling: <b>${cryptoAmount} ${coin.toUpperCase()}</b></p>
+      <p>💵 Price: ₹${price}</p>
+      <p>💸 Tax (30%): ₹${tax.toFixed(2)}</p>
+      <p>💳 You receive: <b>₹${receive.toFixed(2)}</b></p>
+      `;
+  }
+  </script>
+
+  <script src="auth-guard.js"></script>
+<script>
+  // 🔐 AUTH GUARD
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Please login to access this page");
+    window.location.href = "login.html";
+  }
+</script>
+
+<script>
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please login first");
+    window.location.href = "login.html";
+  }
+</script>
+</body>
+</html>

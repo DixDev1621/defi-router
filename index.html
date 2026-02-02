@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Router Portal</title>
+  <link rel="icon" href="Defi logo 2.png">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      color: #fff;
+      background: linear-gradient(135deg, #0f0c29, #1a103d, #32185b, #7326c5);
+      background-size: 300% 300%;
+      animation: gradientShift 10s ease infinite;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    nav {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 50px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      position: fixed;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 22px;
+    }
+
+    .logo img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 15px;
+    }
+
+    .auth-links a,
+    #logoutBtn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      background: linear-gradient(45deg, #6a00ff, #b517ff);
+      color: white;
+      font-size: 14px;
+      text-decoration: none;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    #logoutBtn {
+      display: none;
+      border: none;
+    }
+
+    .hero {
+      margin-top: 140px;
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      color: #c084fc;
+    }
+
+    .hero p {
+      margin-top: 15px;
+      color: #d1c4e9;
+    }
+
+    footer {
+      text-align: center;
+      color: #aaa;
+      margin-top: 100px;
+      padding: 20px;
+      font-size: 14px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav>
+    <div class="logo">
+      <img src="Defi_logo_2-removebg-preview.png" alt="Logo">
+      <span>DeFi Router</span>
+    </div>
+
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="demo.html">Transaction</a>
+      <a href="stake.html">Stake</a>
+      <a href="crosschain.html">Cross-Chain</a>
+      <a href="help.html">Help</a>
+      <a href="about.html">About</a>
+    </div>
+
+    <!-- AUTH AREA -->
+<div id="auth-links" class="auth-links">
+  <a href="register.html">Register</a>
+  <a href="login.html">Login</a>
+</div>
+
+<button id="logoutBtn" onclick="logoutUser()">Logout</button>  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <h1>DeFi Router Portal</h1>
+    <p>Your gateway to secure, AI-powered blockchain transactions.</p>
+  </section>
+
+  <footer>
+    © 2025 DeFi Router. All Rights Reserved.
+  </footer>
+
+  <!-- AUTH SCRIPT -->
+  <script src="auth.js"></script>
+  <script>
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    // hide login & register
+    document.querySelector(".auth-links").innerHTML = `
+      <a href="#" onclick="logout()" style="background:#ff004f;">Logout</a>
+    `;
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    alert("Logged out");
+    window.location.href = "login.html";
+  }
+</script>
+
+<script src="js/auth.js"></script>
+<script>
+  const authDiv = document.getElementById("auth-links");
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    authDiv.innerHTML = `
+      <button onclick="logoutUser()" style="
+        padding:8px 14px;
+        background:#ff004f;
+        border:none;
+        color:white;
+        border-radius:6px;
+        cursor:pointer;
+      ">Logout</button>
+    `;
+  } else {
+    authDiv.innerHTML = `
+      <a href="register.html">Register</a>
+      <a href="login.html">Login</a>
+    `;
+  }
+</script>
+
+<script src="js/auth.js"></script>
+
+<script>
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    document.getElementById("auth-links").style.display = "none";
+    document.getElementById("logoutBtn").style.display = "block";
+  } else {
+    document.getElementById("auth-links").style.display = "block";
+    document.getElementById("logoutBtn").style.display = "none";
+  }
+</script>
+</body>
+</html>

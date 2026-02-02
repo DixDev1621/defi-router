@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeFi Router – Stake POL</title>
+  <link rel="icon" href="Defi logo 2.png" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #1a103d, #32185b, #7326c5);
+      background-size: 300% 300%;
+      animation: gradientShift 10s ease infinite;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    nav {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 50px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      position: fixed;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 22px;
+    }
+
+    .logo img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 10px #9c27b0);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #a855f7;
+    }
+
+    .connect-btn {
+      padding: 10px 18px;
+      background: linear-gradient(45deg, #6a00ff, #b517ff);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .connect-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px #b517ff, 0 0 25px #6a00ff;
+    }
+
+    .main {
+      margin-top: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    h1 {
+      color: #c084fc;
+      font-size: 36px;
+      margin-bottom: 25px;
+      text-shadow: 0 0 12px rgba(155, 0, 255, 0.6);
+    }
+
+    .stake-box {
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 20px;
+      padding: 40px;
+      width: 440px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(14px);
+      transition: all 0.3s ease;
+    }
+
+    .stake-box:hover {
+      box-shadow: 0 0 25px #a855f7;
+      transform: translateY(-5px);
+    }
+
+    input {
+      width: 80%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      font-size: 16px;
+      text-align: center;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+
+    button {
+      margin: 8px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(45deg, #7b2ff7, #f107a3);
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 20px #7b2ff7;
+    }
+
+    #stakeStatus {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #ffdd88;
+    }
+
+    #balanceDisplay {
+      margin-top: 10px;
+      font-size: 15px;
+      color: #ffd700;
+    }
+
+    #popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.85);
+      padding: 25px 50px;
+      border-radius: 12px;
+      font-size: 16px;
+      color: #fff;
+      text-align: center;
+      z-index: 1000;
+      box-shadow: 0 0 20px rgba(255,255,255,0.2);
+    }
+
+    footer {
+      text-align: center;
+      color: #aaa;
+      margin-top: 60px;
+      padding: 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">
+      <img src="Defi_logo_2-removebg-preview.png" alt="Logo">
+      <span>DeFi Router</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="demo.html">Transaction</a>
+      <a href="#">Swap</a>
+      <a href="stake.html">Stake</a>
+      <a href="crosschain.html">Cross-Chain</a>
+      <a href="help.html">Help</a>
+      <a href="about.html">About</a>
+    </div>
+    <button class="connect-btn" onclick="connectWallet()">🔗 Connect Wallet</button>
+  </nav>
+
+  <div class="main">
+    <h1>💎 Stake Your POL Tokens</h1>
+    <div class="stake-box">
+      <button onclick="connectWallet()">🔗 Connect Wallet</button><br />
+      <input type="text" id="stakeAmount" placeholder="Enter amount in POL" /><br />
+      <button onclick="stakePOL()">🚀 Stake POL</button>
+      <button onclick="withdrawPOL()">💰 Withdraw</button>
+      <button onclick="checkBalance()">📊 Check Balance</button>
+      <p id="stakeStatus">⏳ Waiting for wallet connection...</p>
+      <p id="balanceDisplay"></p>
+    </div>
+  </div>
+
+  <div id="popup">🔒 The amount is locked for 3 months. Withdrawal not available now.</div>
+
+  <footer>
+    © 2025 DeFi Router. All Rights Reserved.
+  </footer>
+
+  <script type="module">
+    import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.esm.min.js";
+
+    let provider, signer;
+    const stakingContractAddress = "0x047F36e118EA24A77BdaC4098F4447BEe5c03064";
+    const stakingABI = [
+      "function stake() public payable",
+      "function withdraw() public",
+      "function stakedBalance(address) public view returns (uint256)",
+    ];
+
+    window.connectWallet = async function () {
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        const address = await signer.getAddress();
+        document.getElementById("stakeStatus").innerText = "✅ Connected: " + address;
+      } else {
+        alert("Install MetaMask first!");
+      }
+    };
+
+    window.stakePOL = async function () {
+      const amount = document.getElementById("stakeAmount").value;
+      if (!amount) {
+        document.getElementById("stakeStatus").innerText = "⚠️ Enter amount to stake.";
+        return;
+      }
+      try {
+        const stakingContract = new ethers.Contract(stakingContractAddress, stakingABI, signer);
+        const tx = await stakingContract.stake({ value: ethers.utils.parseEther(amount) });
+        document.getElementById("stakeStatus").innerText = "⏳ Staking...";
+        await tx.wait();
+        document.getElementById("stakeStatus").innerText = "✅ Successfully staked " + amount + " POL!";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("stakeStatus").innerText = "❌ Error: " + err.message;
+      }
+    };
+
+    // ✅ Modified Withdraw to show popup message
+    window.withdrawPOL = function () {
+      const popup = document.getElementById("popup");
+      popup.style.display = "block";
+      setTimeout(() => popup.style.display = "none", 4000);
+    };
+
+    window.checkBalance = async function () {
+      try {
+        const stakingContract = new ethers.Contract(stakingContractAddress, stakingABI, signer);
+        const addr = await signer.getAddress();
+        const balance = await stakingContract.stakedBalance(addr);
+        document.getElementById("balanceDisplay").innerText =
+          "💰 Your staked balance: " + ethers.utils.formatEther(balance) + " POL";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("balanceDisplay").innerText = "⚠️ Error fetching balance.";
+      }
+    };
+  </script>
+
+  <script>
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please login first");
+    window.location.href = "login.html";
+  }
+</script>
+</body>
+</html>
