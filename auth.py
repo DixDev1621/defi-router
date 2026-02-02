@@ -1,44 +1,45 @@
-from flask import Blueprint, request, jsonify
 
-auth_bp = Blueprint("auth", __name__)
+function registerUser() {
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-# Temporary in-memory users (hackathon safe)
-users = []
+  if (!name || !email || !password) {
+    alert("Fill all fields");
+    return;
+  }
 
-@auth_bp.route("/register", methods=["POST"])
-def register():
-    data = request.json
-    name = data.get("name")
-    email = data.get("email")
-    password = data.get("password")
+  localStorage.setItem(
+    "user",
+    JSON.stringify({ name, email, password })
+  );
 
-    if not name or not email or not password:
-        return jsonify({"message": "All fields required"}), 400
+  alert("Registered successfully");
+  window.location.href = "login.html";
+}
 
-    for u in users:
-        if u["email"] == email:
-            return jsonify({"message": "User already exists"}), 400
+function loginUser() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-    users.append({
-        "name": name,
-        "email": email,
-        "password": password
-    })
+  const user = JSON.parse(localStorage.getItem("user"));
 
-    return jsonify({"message": "Registration successful"})
+  if (!user) {
+    alert("No user found. Please register.");
+    return;
+  }
 
+  if (user.email === email && user.password === password) {
+    localStorage.setItem("token", "demo-auth-token");
+    alert("Login successful");
+    window.location.href = "index.html";
+  } else {
+    alert("Invalid credentials");
+  }
+}
 
-@auth_bp.route("/login", methods=["POST"])
-def login():
-    data = request.json
-    email = data.get("email")
-    password = data.get("password")
-
-    for u in users:
-        if u["email"] == email and u["password"] == password:
-            return jsonify({
-                "token": "dummy-token",
-                "message": "Login successful"
-            })
-
-    return jsonify({"message": "Invalid credentials"}), 401
+function logoutUser() {
+  localStorage.removeItem("token");
+  alert("Logged out");
+  window.location.href = "login.html";
+}
