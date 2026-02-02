@@ -78,11 +78,11 @@
       text-decoration: none;
       margin-left: 10px;
       cursor: pointer;
+      border: none;
     }
 
     #logoutBtn {
       display: none;
-      border: none;
     }
 
     .hero {
@@ -131,12 +131,13 @@
     </div>
 
     <!-- AUTH AREA -->
-<div id="auth-links" class="auth-links">
-  <a href="register.html">Register</a>
-  <a href="login.html">Login</a>
-</div>
+    <div id="auth-links" class="auth-links">
+      <a href="register.html">Register</a>
+      <a href="login.html">Login</a>
+    </div>
 
-<button id="logoutBtn" onclick="logoutUser()">Logout</button>  </nav>
+    <button id="logoutBtn" onclick="logoutUser()">Logout</button>
+  </nav>
 
   <!-- ===== HERO ===== -->
   <section class="hero">
@@ -148,61 +149,20 @@
     © 2025 DeFi Router. All Rights Reserved.
   </footer>
 
-  <!-- AUTH SCRIPT -->
-  <script src="auth.js"></script>
+  <!-- ONLY ONE AUTH SCRIPT -->
+  <script src="js/auth.js"></script>
+
   <script>
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  if (token) {
-    // hide login & register
-    document.querySelector(".auth-links").innerHTML = `
-      <a href="#" onclick="logout()" style="background:#ff004f;">Logout</a>
-    `;
-  }
+    if (token) {
+      document.getElementById("auth-links").style.display = "none";
+      document.getElementById("logoutBtn").style.display = "inline-block";
+    } else {
+      document.getElementById("auth-links").style.display = "block";
+      document.getElementById("logoutBtn").style.display = "none";
+    }
+  </script>
 
-  function logout() {
-    localStorage.removeItem("token");
-    alert("Logged out");
-    window.location.href = "login.html";
-  }
-</script>
-
-<script src="js/auth.js"></script>
-<script>
-  const authDiv = document.getElementById("auth-links");
-  const token = localStorage.getItem("token");
-
-  if (token) {
-    authDiv.innerHTML = `
-      <button onclick="logoutUser()" style="
-        padding:8px 14px;
-        background:#ff004f;
-        border:none;
-        color:white;
-        border-radius:6px;
-        cursor:pointer;
-      ">Logout</button>
-    `;
-  } else {
-    authDiv.innerHTML = `
-      <a href="register.html">Register</a>
-      <a href="login.html">Login</a>
-    `;
-  }
-</script>
-
-<script src="auth.js"></script>
-
-<script>
-  const token = localStorage.getItem("token");
-
-  if (token) {
-    document.getElementById("auth-links").style.display = "none";
-    document.getElementById("logoutBtn").style.display = "block";
-  } else {
-    document.getElementById("auth-links").style.display = "block";
-    document.getElementById("logoutBtn").style.display = "none";
-  }
-</script>
 </body>
 </html>
